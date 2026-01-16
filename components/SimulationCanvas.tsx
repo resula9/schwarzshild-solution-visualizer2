@@ -273,20 +273,16 @@ const SimulationCanvas: React.FC<SimulationCanvasProps> = ({
 
   // Update Event Horizon Material AND other components based on visibility
   useEffect(() => {
-    // 1. Event Horizon logic (Holdout vs Black)
+    // 1. Event Horizon logic
     if (horizonMeshRef.current) {
+      // Ensure material properties are reset if they were modified by previous holdout logic
       const mat = horizonMeshRef.current.material as THREE.MeshBasicMaterial;
-      if (showEventHorizon) {
-        mat.color.setHex(0x000000);
-        mat.colorWrite = true;
-        mat.transparent = false;
-        mat.opacity = 1.0;
-      } else {
-        // Holdout mask: Invisible but writes to depth buffer to occlude stars
-        mat.colorWrite = false; 
-        mat.depthWrite = true;  
-      }
-      horizonMeshRef.current.visible = true;
+      mat.colorWrite = true;
+      mat.depthWrite = true;
+      mat.opacity = 1.0;
+      
+      // Completely toggle visibility
+      horizonMeshRef.current.visible = showEventHorizon;
     }
 
     // 2. Hide other structural elements when "Hidden" mode is active

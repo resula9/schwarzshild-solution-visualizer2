@@ -76,7 +76,7 @@ This is the Three.js renderer.
 - **Scene Setup**: Dark space background, high-density starfield.
 - **Optimization**: **MUST** use shared `BufferGeometry` and `Materials` for ray objects to support up to **1000 rays** without dropping frames.
 - **Structural Components**:
-    -   **Event Horizon**: Sphere at $2M$. When "Hidden", it applies a `colorWrite: false, depthWrite: true` material to act as a **Holdout Mask** (occludes stars but renders nothing).
+    -   **Event Horizon**: Sphere at $2M$. When "Hidden", it should be completely removed from the scene (set `visible = false`), allowing background stars to be seen through it.
     -   **Photon Sphere**: Wireframe at $3M$.
     -   **Accretion Disk**: Custom ShaderMaterial with procedural noise.
 - **Ray Rendering**:
@@ -100,7 +100,7 @@ Photons change color dynamically based on radial coordinate $r$:
 4.  **Horizon**: Fade to dark/black.
 
 ### Visibility Logic
-- **"Structural Vis: OFF"**: Hides the Photon Sphere wireframe, Accretion Disk, and Glow. The Event Horizon mesh turns into an occlusion mask. Only the photon rays and the starfield remain visible.
+- **"Structural Vis: OFF"**: Hides the Photon Sphere wireframe, Accretion Disk, Glow, and Event Horizon mesh. Only the photon rays and the starfield remain visible.
 
 ### Aesthetic Guidelines
 - **Theme**: "Space" (Deep blues/blacks).

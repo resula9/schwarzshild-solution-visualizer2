@@ -28,7 +28,7 @@ Black holes warp spacetime so intensely that light itself bends. This simulator 
   - **Black Sphere**: The Event Horizon ($2M$).
   - **Cyan Wireframe**: The Photon Sphere ($3M$).
   - **Accretion Disk**: Shader-based procedural plasma visualization.
-- **Structural Visibility Control**: Toggle the visibility of the black hole structure. When hidden, an advanced **Holdout Mask** is applied, rendering the event horizon invisible while still correctly occluding background stars to create a realistic "void".
+- **Structural Visibility Control**: Toggle the visibility of the black hole structure. When hidden, the black hole mesh is completely removed, allowing you to see star trails and background objects passing through the geometric center (revealing the coordinate system without the occlusion).
 
 ### 🌈 Gravitational Redshift & Coloring
 Photons dynamically change color based on their radial distance from the singularity, simulating gravitational redshift/blueshift effects:
@@ -95,11 +95,11 @@ Where:
      - Change the **Mass** to make the black hole larger.
      - Adjust **Impact Parameter (b)** to aim closer or further from the center.
    - **Ray Count**: Scale up to 1000 rays for high-density simulations.
-   - **Visuals**: Toggle "Event Horizon" to see the raw photon paths against the starfield with a realistic shadow.
+   - **Visuals**: Toggle "Event Horizon" to see the raw photon paths against the starfield without any obstruction.
 
 ### Visual Cues
 - **Redshift**: Watch as rays transition from blue to red as they dive into the gravity well.
-- **Occlusion**: Even when the black hole mesh is hidden, the background stars are blocked by the event horizon, simulating the absence of light coming from behind the hole.
+- **Occlusion**: When the event horizon is enabled, it blocks background stars, simulating the black hole's shadow.
 
 ## 🛠 Tech Stack
 
