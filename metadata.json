@@ -1,0 +1,5 @@
+{
+  "name": "Schwarzschild Geodesic Simulator",
+  "description": "A 3D interactive simulator for null geodesics (light rays) in Schwarzschild spacetime. Visualize photon orbits, event horizon crossings, and gravitational lensing effects.",
+  "requestFramePermissions": []
+}
