@@ -1,5 +1,5 @@
 import React from 'react';
-import { Play, Pause, RotateCcw, Shuffle, Globe, Disc, Target, Equal, Dna, Eye } from 'lucide-react';
+import { Play, Pause, RotateCcw, Shuffle, Globe, Disc, Target, Equal, Dna, Eye, EyeOff, Infinity } from 'lucide-react';
 import { DistributionMode, ImpactMode } from '../types';
 
 interface ControlsProps {
@@ -15,6 +15,8 @@ interface ControlsProps {
   setPhotonSize: (val: number) => void;
   isPlaying: boolean;
   togglePlay: () => void;
+  isContinuous: boolean;
+  toggleContinuous: () => void;
   onReset: () => void;
   onSeek: (val: number) => void;
   onRandomize: () => void;
@@ -25,6 +27,8 @@ interface ControlsProps {
   progress: number;
   maxSteps: number;
   bCrit: number;
+  showEventHorizon: boolean;
+  toggleEventHorizon: () => void;
 }
 
 const PresetButton: React.FC<{ label: string; value: number; onClick: (v: number) => void; active: boolean }> = ({ label, value, onClick, active }) => (
@@ -47,11 +51,14 @@ const Controls: React.FC<ControlsProps> = ({
   speed, setSpeed,
   photonSize, setPhotonSize,
   isPlaying, togglePlay,
+  isContinuous, toggleContinuous,
   onReset, onSeek, onRandomize,
   distributionMode, setDistributionMode,
   impactMode, setImpactMode,
   progress, maxSteps,
-  bCrit
+  bCrit,
+  showEventHorizon,
+  toggleEventHorizon
 }) => {
   
   // Dynamic presets based on Mass
@@ -84,11 +91,18 @@ const Controls: React.FC<ControlsProps> = ({
       <div className="bg-space-700/50 rounded-xl p-4 border border-white/10 backdrop-blur-sm">
         <div className="flex items-center justify-between mb-2">
           <div className="text-xs font-mono text-cyan-glow/70 uppercase tracking-widest">Timeline</div>
-          <div className="text-xs font-mono text-white/50">{Math.floor(progress)} / {maxSteps}</div>
+          {!isContinuous && (
+            <div className="text-xs font-mono text-white/50">{Math.floor(progress)} / {maxSteps}</div>
+          )}
+          {isContinuous && (
+             <div className="text-xs font-mono text-amber-400/80 flex items-center gap-1">
+                <Infinity size={12} /> LOOP
+             </div>
+          )}
         </div>
 
-        {/* Video Scrubber */}
-        <div className="relative w-full h-5 mb-4 group flex items-center">
+        {/* Video Scrubber - Disabled in Continuous Mode */}
+        <div className={`relative w-full h-5 mb-4 group flex items-center ${isContinuous ? 'opacity-50 pointer-events-none grayscale' : ''}`}>
             {/* Background Track */}
             <div className="absolute w-full h-1.5 bg-space-900 rounded-full overflow-hidden border border-white/5">
                 {/* Progress Fill */}
@@ -107,6 +121,7 @@ const Controls: React.FC<ControlsProps> = ({
                 value={progress}
                 onChange={(e) => onSeek(parseFloat(e.target.value))}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                disabled={isContinuous}
             />
 
             {/* Custom Thumb */}
@@ -119,19 +134,33 @@ const Controls: React.FC<ControlsProps> = ({
         <div className="flex gap-2 mb-4">
           <button
             onClick={togglePlay}
+            disabled={isContinuous}
             className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg font-medium transition-all ${
-              isPlaying 
+              isPlaying || isContinuous
                 ? 'bg-amber-500/20 border border-amber-500/50 text-amber-300 hover:bg-amber-500/30' 
                 : 'bg-cyan-500/20 border border-cyan-500/50 text-cyan-300 hover:bg-cyan-500/30'
-            }`}
+            } ${isContinuous ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            {isPlaying ? <Pause size={16} /> : <Play size={16} />}
-            {isPlaying ? 'Pause' : 'Simulate'}
+            {isPlaying || isContinuous ? <Pause size={16} /> : <Play size={16} />}
+            {isContinuous ? 'Looping' : (isPlaying ? 'Pause' : 'Simulate')}
           </button>
           
           <button
+            onClick={toggleContinuous}
+            className={`px-3 py-2 rounded-lg border transition-all flex items-center justify-center gap-2 ${
+               isContinuous 
+                 ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300' 
+                 : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white'
+            }`}
+            title="Continuous Flow Mode"
+          >
+             <Infinity size={16} />
+          </button>
+
+          <button
             onClick={onReset}
-            className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+            disabled={isContinuous}
+            className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-colors disabled:opacity-50"
             title="Reset Simulation"
           >
             <RotateCcw size={16} />
@@ -162,6 +191,16 @@ const Controls: React.FC<ControlsProps> = ({
          </div>
          <div className="space-y-3">
           <div className="flex justify-between items-center">
+            <label className="text-sm font-medium text-white/90">Event Horizon</label>
+            <button
+              onClick={toggleEventHorizon}
+              className={`p-1.5 rounded-md transition-colors ${showEventHorizon ? 'bg-cyan-500/20 text-cyan-300' : 'bg-white/5 text-white/50 hover:text-white'}`}
+              title={showEventHorizon ? "Hide Black Hole" : "Show Black Hole"}
+            >
+              {showEventHorizon ? <Eye size={16} /> : <EyeOff size={16} />}
+            </button>
+          </div>
+          <div className="flex justify-between items-center">
             <label className="text-sm font-medium text-white/90">Photon Size</label>
             <span className="font-mono text-sm text-white/70">{photonSize.toFixed(2)}</span>
           </div>
@@ -191,7 +230,7 @@ const Controls: React.FC<ControlsProps> = ({
                 <button
                   key={mode.id}
                   onClick={() => setDistributionMode(mode.id)}
-                  disabled={isPlaying}
+                  disabled={isPlaying || isContinuous}
                   className={`flex-1 flex items-center justify-center gap-2 py-1.5 text-xs font-medium rounded-md transition-all disabled:opacity-50
                     ${distributionMode === mode.id
                       ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-900/50' 
@@ -213,7 +252,7 @@ const Controls: React.FC<ControlsProps> = ({
                 <button
                   key={mode.id}
                   onClick={() => setImpactMode(mode.id)}
-                  disabled={isPlaying}
+                  disabled={isPlaying || isContinuous}
                   className={`flex-1 flex items-center justify-center gap-2 py-1.5 text-xs font-medium rounded-md transition-all disabled:opacity-50
                     ${impactMode === mode.id
                       ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/50' 
@@ -240,7 +279,7 @@ const Controls: React.FC<ControlsProps> = ({
             max="2.5"
             step="0.1"
             value={mass}
-            disabled={isPlaying}
+            disabled={isPlaying || isContinuous}
             onChange={(e) => setMass(parseFloat(e.target.value))}
             className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer disabled:opacity-50 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-purple-400 [&::-webkit-slider-thumb]:rounded-full"
           />
@@ -261,7 +300,7 @@ const Controls: React.FC<ControlsProps> = ({
               max={maxB}
               step={0.05 * mass}
               value={b}
-              disabled={isPlaying}
+              disabled={isPlaying || isContinuous}
               onChange={(e) => setB(parseFloat(e.target.value))}
               className={`w-full h-1.5 rounded-lg appearance-none cursor-pointer disabled:opacity-50
                 ${b < bCrit ? 'bg-red-900/50 [&::-webkit-slider-thumb]:bg-red-500' : 'bg-emerald-900/50 [&::-webkit-slider-thumb]:bg-emerald-500'}
@@ -300,16 +339,16 @@ const Controls: React.FC<ControlsProps> = ({
             <input
               type="range"
               min="1"
-              max="100"
+              max="1000"
               step="1"
               value={rayCount}
-              disabled={isPlaying}
+              disabled={isPlaying || isContinuous}
               onChange={(e) => setRayCount(parseInt(e.target.value))}
               className="flex-1 h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer disabled:opacity-50 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-indigo-400 [&::-webkit-slider-thumb]:rounded-full"
             />
             <button
               onClick={onRandomize}
-              disabled={isPlaying}
+              disabled={isPlaying || isContinuous}
               className="p-1.5 bg-white/5 rounded hover:bg-white/10 disabled:opacity-50 transition-colors text-white/70"
               title="Randomize Angles"
             >

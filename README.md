@@ -5,7 +5,7 @@
 ![Three.js](https://img.shields.io/badge/Three.js-r160-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
 
-A high-fidelity, interactive 3D simulation of **null geodesics** (light rays) navigating the curved spacetime of a static, non-rotating black hole. This application solves the geodesic equations of the **Schwarzschild metric** in real-time to visualize gravitational lensing, photon capture, and the photon sphere.
+A high-fidelity, interactive 3D simulation of **null geodesics** (light rays) navigating the curved spacetime of a static, non-rotating black hole. This application solves the geodesic equations of the **Schwarzschild metric** in real-time to visualize gravitational lensing, photon capture, and gravitational redshift.
 
 ## 🌌 Overview
 
@@ -13,7 +13,7 @@ Black holes warp spacetime so intensely that light itself bends. This simulator 
 - **Gravitational Lensing**: Light bending around the massive object.
 - **The Photon Sphere**: The unstable orbit where light circles the black hole ($r = 3M$).
 - **The Event Horizon**: The point of no return ($r = 2M$).
-- **Critical Impact Parameters**: The precise boundary between capture and escape.
+- **Gravitational Redshift**: The shift in light color as it climbs out of or falls into the gravity well.
 
 ## ✨ Features
 
@@ -27,20 +27,18 @@ Black holes warp spacetime so intensely that light itself bends. This simulator 
 - **Accurate Scales**:
   - **Black Sphere**: The Event Horizon ($2M$).
   - **Cyan Wireframe**: The Photon Sphere ($3M$).
-  - **Accretion Plane**: Visual reference for the equatorial plane.
-- **Dynamic Photon Coloring**:
-  - 🟡 **Yellow**: Incoming photons (fate undecided).
-  - 🔴 **Red**: Photons destined to be trapped by the event horizon.
-  - 🔵 **Blue**: Photons that undergo significant deflection (lensing) but escape.
+  - **Accretion Disk**: Shader-based procedural plasma visualization.
+- **Structural Visibility Control**: Toggle the visibility of the black hole structure. When hidden, an advanced **Holdout Mask** is applied, rendering the event horizon invisible while still correctly occluding background stars to create a realistic "void".
 
-### 🎛 Interactive Controls
-- **Emission Modes**:
-  - **Beam**: A focused bundle of parallel rays.
-  - **Isotropic**: Random distribution from a spherical source.
-  - **Planar**: Rays originating from the equatorial plane.
-- **Impact Parameter ($b$)**: Fine-tune the "aim" of the light rays.
-- **Time Control**: Pause, play, scrub through time, and adjust simulation speed.
-- **Visual Settings**: Adjust photon size and simulation resolution.
+### 🌈 Gravitational Redshift & Coloring
+Photons dynamically change color based on their radial distance from the singularity, simulating gravitational redshift/blueshift effects:
+- ⚪ **Blue/White**: Far field ($r > 10M$).
+- 🟡 **Yellow/Gold**: Approaching the photon sphere ($r \approx 4M$).
+- 🔴 **Deep Red**: Near the event horizon ($r < 2.5M$).
+
+### 🚀 High Performance
+- **Optimized Rendering**: Supports up to **1000 simultaneous light rays**.
+- **Geometry Instancing**: Efficiently manages memory by sharing geometries and materials across particle systems.
 
 ## 🚀 Getting Started
 
@@ -96,11 +94,12 @@ Where:
    - **Physics Settings**: 
      - Change the **Mass** to make the black hole larger.
      - Adjust **Impact Parameter (b)** to aim closer or further from the center.
-   - **Ray Count**: Increase for a dense cloud of particles, decrease for performance.
+   - **Ray Count**: Scale up to 1000 rays for high-density simulations.
+   - **Visuals**: Toggle "Event Horizon" to see the raw photon paths against the starfield with a realistic shadow.
 
 ### Visual Cues
-- **Trapped Rays**: If a ray turns **Red**, it has crossed the effective potential barrier and will inevitably hit the Event Horizon. In the visualization, the particle vanishes upon contact with the black sphere.
-- **Lensed Rays**: If a ray turns **Blue**, it came very close to the critical limit ($b \approx b_{crit}$) and was strongly deflected by gravity.
+- **Redshift**: Watch as rays transition from blue to red as they dive into the gravity well.
+- **Occlusion**: Even when the black hole mesh is hidden, the background stars are blocked by the event horizon, simulating the absence of light coming from behind the hole.
 
 ## 🛠 Tech Stack
 

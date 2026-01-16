@@ -22,6 +22,7 @@ export interface RayPath {
   crossed: boolean;
   escaped: boolean;
   turned: boolean;
+  timeOffset: number; // Random delay for continuous mode
 }
 
 export interface SimulationConfig {

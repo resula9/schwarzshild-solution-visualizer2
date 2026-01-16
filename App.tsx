@@ -14,10 +14,12 @@ const App: React.FC = () => {
   const [speed, setSpeed] = useState<number>(1.0);
   const [photonSize, setPhotonSize] = useState<number>(0.04);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [isContinuous, setIsContinuous] = useState<boolean>(false);
   const [distributionMode, setDistributionMode] = useState<DistributionMode>('isotropic'); 
   const [impactMode, setImpactMode] = useState<ImpactMode>('fixed');
   const [time, setTime] = useState<number>(0);
   const [maxTime, setMaxTime] = useState<number>(100);
+  const [showEventHorizon, setShowEventHorizon] = useState<boolean>(true);
 
   // Computed State
   const [rays, setRays] = useState<RayPath[]>([]);
@@ -32,7 +34,7 @@ const App: React.FC = () => {
     setRays(newRays);
     
     // Reset time when physics change manually (if not playing)
-    if (!isPlaying) {
+    if (!isPlaying && !isContinuous) {
       setTime(0);
       timeRef.current = 0;
     }
@@ -40,7 +42,9 @@ const App: React.FC = () => {
 
   // Animation Loop
   const animate = useCallback(() => {
-    if (timeRef.current < maxTime) {
+    // If continuous mode is on, we just keep increasing time indefinitely
+    // The visual loop logic happens inside SimulationCanvas using modulo
+    if (isContinuous || timeRef.current < maxTime) {
       timeRef.current += speed;
       setTime(timeRef.current);
       requestRef.current = requestAnimationFrame(animate);
@@ -49,10 +53,10 @@ const App: React.FC = () => {
       timeRef.current = maxTime;
       setTime(maxTime);
     }
-  }, [maxTime, speed]);
+  }, [maxTime, speed, isContinuous]);
 
   useEffect(() => {
-    if (isPlaying) {
+    if (isPlaying || isContinuous) {
       requestRef.current = requestAnimationFrame(animate);
     } else {
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
@@ -60,11 +64,12 @@ const App: React.FC = () => {
     return () => {
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
     };
-  }, [isPlaying, animate]);
+  }, [isPlaying, isContinuous, animate]);
 
   // Handlers
   const handleReset = () => {
     setIsPlaying(false);
+    setIsContinuous(false); // Reset mode too
     timeRef.current = 0;
     setTime(0);
   };
@@ -79,8 +84,23 @@ const App: React.FC = () => {
     handleReset();
   };
 
+  const toggleContinuous = () => {
+     const newState = !isContinuous;
+     setIsContinuous(newState);
+     // If turning on, we don't necessarily reset time, but we ensure it keeps running
+     if (newState) {
+       setIsPlaying(false); // Disable standard play state to avoid conflict
+     }
+  };
+
   // Status Logic
   const anyInside = rays.some(r => {
+    // In continuous mode, checks are tricky because indices vary.
+    // We disable this specific warning or just check "if any ray IS CURRENTLY inside"
+    // For simplicity, we keep standard check but it might flicker in continuous mode.
+    // Let's use standard logic but adapted index.
+    if (isContinuous) return false; // Disable warning in continuous mode to avoid noise
+    
     const idx = Math.min(Math.floor(time), r.points.length - 1);
     return idx >= 0 && r.points[idx].crossed;
   });
@@ -88,6 +108,7 @@ const App: React.FC = () => {
   const bCrit = getCriticalB(mass);
 
   const getStatusText = () => {
+    if (isContinuous) return "Continuous Flow Active";
     const trapped = rays.filter(r => r.crossed).length;
     const escaped = rays.filter(r => r.escaped).length;
     
@@ -130,6 +151,8 @@ const App: React.FC = () => {
                 time={time} 
                 setMaxTime={setMaxTime}
                 photonSize={photonSize}
+                isContinuous={isContinuous}
+                showEventHorizon={showEventHorizon}
              />
              
              {/* Dynamic Warnings Overlay */}
@@ -174,7 +197,8 @@ const App: React.FC = () => {
                 rayCount={rayCount} setRayCount={setRayCount}
                 speed={speed} setSpeed={setSpeed}
                 photonSize={photonSize} setPhotonSize={setPhotonSize}
-                isPlaying={isPlaying} togglePlay={() => setIsPlaying(!isPlaying)}
+                isPlaying={isPlaying} togglePlay={() => { setIsPlaying(!isPlaying); setIsContinuous(false); }}
+                isContinuous={isContinuous} toggleContinuous={toggleContinuous}
                 onReset={handleReset}
                 onSeek={handleSeek}
                 onRandomize={handleRandomize}
@@ -185,6 +209,8 @@ const App: React.FC = () => {
                 progress={time}
                 maxSteps={maxTime}
                 bCrit={bCrit}
+                showEventHorizon={showEventHorizon}
+                toggleEventHorizon={() => setShowEventHorizon(!showEventHorizon)}
              />
           </div>
         </div>

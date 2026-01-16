@@ -224,7 +224,8 @@ export function buildRays(b: number, mass: number, count: number, seed: number, 
       points: points3D,
       crossed: res.crossed,
       escaped: res.escaped,
-      turned: res.turned
+      turned: res.turned,
+      timeOffset: Math.floor(rng() * 400) // Random start offset for continuous mode
     });
   }
   return result;
